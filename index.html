@@ -1,13 +1,54 @@
 <!DOCTYPE html>
 <html>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+      /* 設定按鈕樣式，讓它浮在畫面下方 */
+      .ui-container {
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+        z-index: 1000; display: flex; gap: 10px;
+      }
+      button {
+        padding: 15px 25px; font-size: 18px; cursor: pointer;
+        background: white; border: 2px solid #ffcccc; border-radius: 30px;
+      }
+    </style>
+  </head>
+
   <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
-      <a-marker preset="hiro">
-        <a-box position="0 0.5 0" material="color: red;" animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"></a-box>
+    <div class="ui-container">
+      <button onclick="switchLayer('heart')">❤ 愛心層</button>
+      <button onclick="switchLayer('star')">⭐ 星星層</button>
+    </div>
+
+    <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
+      <a-marker type="pattern" url="pattern-sheep.patt">
+        
+        <a-image src="sheep.png" position="0 0 0" rotation="-90 0 0" width="1.5" height="1.5"></a-image>
+
+        <a-image id="layer-heart" src="heart.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="true"></a-image>
+
+        <a-image id="layer-star" src="star.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
+
       </a-marker>
       <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+      function switchLayer(choice) {
+        const heart = document.querySelector('#layer-heart');
+        const star = document.querySelector('#layer-star');
+        
+        if (choice === 'heart') {
+          heart.setAttribute('visible', 'true');
+          star.setAttribute('visible', 'false');
+        } else {
+          heart.setAttribute('visible', 'false');
+          star.setAttribute('visible', 'true');
+        }
+      }
+    </script>
   </body>
 </html>
