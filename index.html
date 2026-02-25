@@ -49,8 +49,12 @@
         <a-marker preset="hiro">
             <a-image id="base-sheep" src="sheep.png" position="0 0 0" rotation="-90 0 0" width="1.5" height="1.5"></a-image>
 
-            <a-image id="layer-heart" src="heart.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
-            <a-image id="layer-star" src="star.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
+            <a-image id="layer-heart" src="#heart-img" ...
+         animation="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; dur: 500; loop: true">
+</a-image>
+            <a-image id="layer-star" src="#star-img" ...
+         animation="property: rotation; to: -90 360 0; dur: 3000; loop: true; easing: linear">
+</a-image>
 
             <a-image id="layer-ribbon_a" src="ribbon.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
             <a-image id="layer-bow" src="bow.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
