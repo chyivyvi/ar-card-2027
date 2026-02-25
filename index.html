@@ -49,11 +49,11 @@
         <a-marker preset="hiro">
             <a-image id="base-sheep" src="sheep.png" position="0 0 0" rotation="-90 0 0" width="1.5" height="1.5"></a-image>
 
-            <a-image id="layer-heart" src="#heart-img" ...
-         animation="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; dur: 500; loop: true">
+           <a-image id="layer-heart" src="heart.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"
+         animation="property: scale; from: 1 1 1; to: 1.1 1.1 1.1; dir: alternate; dur: 600; loop: true; easing: easeInOutSine">
 </a-image>
-            <a-image id="layer-star" src="#star-img" ...
-         animation="property: rotation; to: -90 360 0; dur: 3000; loop: true; easing: linear">
+            <a-image id="layer-star" src="star.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"
+         animation="property: rotation; from: -90 0 0; to: -90 360 0; dur: 5000; loop: true; easing: linear">
 </a-image>
 
             <a-image id="layer-ribbon_a" src="ribbon.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
@@ -103,19 +103,48 @@
             document.getElementById('step1-btns').style.display = 'flex';
         }
 
-        // 拍照截圖功能
-        function takeSnapshot() {
-            const scene = document.querySelector('a-scene');
-            const canvas = scene.components.screenshot.getCanvas('perspective');
-            
-            // 建立下載連結
+        async function takeSnapshot() {
+    const scene = document.querySelector('a-scene');
+    // 1. 強制渲染目前的畫面
+    scene.renderer.render(scene.object3D, scene.camera);
+    const canvas = scene.renderer.domElement;
+
+    // 2. 建立一個新畫布來修正比例，防止壓扁
+    const tempCanvas = document.createElement('canvas');
+    const ctx = tempCanvas.getContext('2d');
+    
+    // 設定畫布寬高與手機螢幕渲染寬高一致
+    tempCanvas.width = canvas.clientWidth;
+    tempCanvas.height = canvas.clientHeight;
+    
+    // 繪製影像 (這步會保留原始比例)
+    ctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+
+    // 3. 轉換為 Blob 檔案準備分享
+    tempCanvas.toBlob(async (blob) => {
+        const file = new File([blob], "MyARCard.png", { type: "image/png" });
+        
+        // 4. 判斷是否支援原生分享 (手機端多數支援)
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: '我的 2027 賀年卡',
+                    text: '這是我自己組裝的小羊賀卡，可愛嗎？'
+                });
+            } catch (err) {
+                console.log("使用者取消分享或發生錯誤");
+            }
+        } else {
+            // 5. 備案：若不支援分享（如電腦版），則執行下載
             const link = document.createElement('a');
-            link.setAttribute('download', 'AR_NewYearCard_2027.png');
-            link.setAttribute('href', canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream'));
+            link.href = URL.createObjectURL(blob);
+            link.download = 'AR_NewYearCard_2027.png';
             link.click();
-            
-            alert('照片已試圖下載！(若在App內開啟請長按圖片儲存)');
+            alert('瀏覽器不支援直接分享，已為您下載圖片！');
         }
+    }, 'image/png');
+}
     </script>
 </body>
 </html>
