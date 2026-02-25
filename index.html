@@ -87,7 +87,16 @@
             }
         }
 
-       function resetGame() {
+        function backStep(step) {
+    if (step === 1) {
+        document.getElementById('step1-btns').style.display = 'flex';
+        document.getElementById('step2-btns').style.display = 'none';
+        document.getElementById('step3-btns').style.display = 'none';
+        document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
+    }
+}
+
+function resetGame() {
     // 1. 隱藏所有裝飾層並重置它們的狀態
     const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow'];
     layers.forEach(id => {
