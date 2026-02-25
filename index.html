@@ -87,21 +87,21 @@
             }
         }
 
-        function backStep(step) {
-            nextStep(step);
-            if(step === 1) document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
+       function resetGame() {
+    // 1. 隱藏所有裝飾層並重置它們的狀態
+    const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow'];
+    layers.forEach(id => {
+        const el = document.querySelector(id);
+        if (el) {
+            el.setAttribute('visible', 'false');
+            // 重要：重置縮放比例，防止動畫殘留
+            el.setAttribute('scale', '1 1 1');
         }
+    });
 
-        // 重置功能
-        function resetGame() {
-            // 隱藏所有裝飾層
-            document.querySelectorAll('a-image:not(#base-sheep)').forEach(img => {
-                img.setAttribute('visible', 'false');
-            });
-            // 回到第一步
-            backStep(1);
-            document.getElementById('step1-btns').style.display = 'flex';
-        }
+    // 2. 回到第一步 UI
+    backStep(1);
+}
 
         async function takeSnapshot() {
     const scene = document.querySelector('a-scene');
