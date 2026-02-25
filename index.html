@@ -33,28 +33,26 @@
         </div>
 
         <div id="step2-btns" class="button-group" style="display: none;">
-            <button onclick="backStep(1)">⬅ 返回</button>
+            <button onclick="backToStep1()">⬅ 返回</button>
             <button onclick="selectLayer('ribbon', 'ribbon_a')">🎀 緞帶</button>
             <button onclick="selectLayer('ribbon', 'bow')">🎁 蝴蝶結</button>
             <button class="confirm-btn" onclick="nextStep(3)">完成 ✔</button>
         </div>
 
         <div id="step3-btns" class="button-group" style="display: none;">
-            <button class="action-btn" onclick="takeSnapshot()">📸 拍照保存</button>
+            <button class="action-btn" onclick="takeSnapshot()">📸 分享照片</button>
             <button onclick="resetGame()">🔄 再玩一次</button>
         </div>
     </div>
 
     <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; patternRatio: 0.5;" renderer="preserveDrawingBuffer: true;">
-        <a-marker type="pattern" url="./pattern-sheep.patt" emitevents="true">
+        <a-marker type="pattern" url="./pattern-sheep.patt">
             <a-image id="base-sheep" src="sheep.png" position="0 0 0" rotation="-90 0 0" width="1.5" height="1.5"></a-image>
 
-           <a-image id="layer-heart" src="heart.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"
-         animation="property: scale; from: 1 1 1; to: 1.1 1.1 1.1; dir: alternate; dur: 600; loop: true; easing: easeInOutSine">
-</a-image>
+            <a-image id="layer-heart" src="heart.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"
+                     animation="property: scale; from: 1 1 1; to: 1.1 1.1 1.1; dir: alternate; dur: 600; loop: true; easing: easeInOutSine"></a-image>
             <a-image id="layer-star" src="star.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"
-         animation="property: rotation; from: -90 0 0; to: -90 360 0; dur: 5000; loop: true; easing: linear">
-</a-image>
+                     animation="property: rotation; from: -90 0 0; to: -90 360 0; dur: 5000; loop: true; easing: linear"></a-image>
 
             <a-image id="layer-ribbon_a" src="ribbon.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
             <a-image id="layer-bow" src="bow.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
@@ -74,10 +72,7 @@
         }
 
         function nextStep(step) {
-            document.getElementById('step1-btns').style.display = 'none';
-            document.getElementById('step2-btns').style.display = 'none';
-            document.getElementById('step3-btns').style.display = 'none';
-
+            hideAllUI();
             if (step === 2) {
                 document.getElementById('step2-btns').style.display = 'flex';
                 document.getElementById('hint').innerText = '第二步：加上飾品';
@@ -87,73 +82,58 @@
             }
         }
 
-        function backStep(step) {
-    if (step === 1) {
-        document.getElementById('step1-btns').style.display = 'flex';
-        document.getElementById('step2-btns').style.display = 'none';
-        document.getElementById('step3-btns').style.display = 'none';
-        document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
-    }
-}
-
-function resetGame() {
-    // 1. 隱藏所有裝飾層並重置它們的狀態
-    const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow'];
-    layers.forEach(id => {
-        const el = document.querySelector(id);
-        if (el) {
-            el.setAttribute('visible', 'false');
-            // 重要：重置縮放比例，防止動畫殘留
-            el.setAttribute('scale', '1 1 1');
+        function backToStep1() {
+            hideAllUI();
+            document.getElementById('step1-btns').style.display = 'flex';
+            document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
         }
-    });
 
-    // 2. 回到第一步 UI
-    backStep(1);
-}
+        function hideAllUI() {
+            document.getElementById('step1-btns').style.display = 'none';
+            document.getElementById('step2-btns').style.display = 'none';
+            document.getElementById('step3-btns').style.display = 'none';
+        }
+
+        function resetGame() {
+            // 重置所有圖層可見度與比例
+            const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow'];
+            layers.forEach(id => {
+                const el = document.querySelector(id);
+                if (el) {
+                    el.setAttribute('visible', 'false');
+                    el.setAttribute('scale', '1 1 1');
+                }
+            });
+            backToStep1();
+        }
 
         async function takeSnapshot() {
-    const scene = document.querySelector('a-scene');
-    // 1. 強制渲染目前的畫面
-    scene.renderer.render(scene.object3D, scene.camera);
-    const canvas = scene.renderer.domElement;
+            const scene = document.querySelector('a-scene');
+            scene.renderer.render(scene.object3D, scene.camera);
+            const canvas = scene.renderer.domElement;
 
-    // 2. 建立一個新畫布來修正比例，防止壓扁
-    const tempCanvas = document.createElement('canvas');
-    const ctx = tempCanvas.getContext('2d');
-    
-    // 設定畫布寬高與手機螢幕渲染寬高一致
-    tempCanvas.width = canvas.clientWidth;
-    tempCanvas.height = canvas.clientHeight;
-    
-    // 繪製影像 (這步會保留原始比例)
-    ctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+            const tempCanvas = document.createElement('canvas');
+            const ctx = tempCanvas.getContext('2d');
+            
+            // 修正比例：使用顯示寬高
+            tempCanvas.width = canvas.clientWidth;
+            tempCanvas.height = canvas.clientHeight;
+            ctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
 
-    // 3. 轉換為 Blob 檔案準備分享
-    tempCanvas.toBlob(async (blob) => {
-        const file = new File([blob], "MyARCard.png", { type: "image/png" });
-        
-        // 4. 判斷是否支援原生分享 (手機端多數支援)
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({
-                    files: [file],
-                    title: '我的 2027 賀年卡',
-                    text: '這是我自己組裝的小羊賀卡，可愛嗎？'
-                });
-            } catch (err) {
-                console.log("使用者取消分享或發生錯誤");
-            }
-        } else {
-            // 5. 備案：若不支援分享（如電腦版），則執行下載
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'AR_NewYearCard_2027.png';
-            link.click();
-            alert('瀏覽器不支援直接分享，已為您下載圖片！');
+            tempCanvas.toBlob(async (blob) => {
+                const file = new File([blob], "AR_Card.png", { type: "image/png" });
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({ files: [file], title: '我的 AR 賀卡' });
+                    } catch (err) {}
+                } else {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'AR_Card.png';
+                    link.click();
+                }
+            }, 'image/png');
         }
-    }, 'image/png');
-}
     </script>
 </body>
 </html>
