@@ -40,7 +40,7 @@
         </div>
 
         <div id="step3-btns" class="button-group" style="display: none;">
-            <button class="action-btn" onclick="enterPhotoMode()">📸 隱藏介面合照</button>
+            <button class="action-btn" onclick="enterPhotoMode(event)">📸 隱藏介面合照</button>
             <button onclick="resetGame()">🔄 再玩一次</button>
          </div>
     </div>
@@ -106,16 +106,27 @@
             document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
         }
 
-        function enterPhotoMode() {
-            // 1. 隱藏 UI 容器和提示字
-            document.querySelector('.ui-container').style.display = 'none';
+        // 拍照隱藏UI介面
+    function enterPhotoMode(event) {
+    // 阻止事件傳給 window，避免秒速退出
+    if (event) event.stopPropagation();
+
+    // 1. 隱藏 UI 容器
+    document.querySelector('.ui-container').style.display = 'none';
     
-            // 2. 顯示一個浮動的小提示（可選，告訴使用者點螢幕回來）
-            // 或者乾脆全空，讓畫面最乾淨
-    
-            // 3. 監聽全螢幕點擊事件
-            window.addEventListener('click', exitPhotoMode, { once: true });
-        }
+    // 2. 監聽全螢幕點擊事件來喚回
+    // 加上 setTimeout 是為了保險，確保這次的點擊動作已經結束
+    setTimeout(() => {
+        window.addEventListener('click', exitPhotoMode, { once: true });
+    }, 100);
+        document.getElementById('hint').style.display = 'none'; // 隱藏提示字
+}
+
+function exitPhotoMode() {
+    document.querySelector('.ui-container').style.display = 'flex';
+    document.getElementById('hint').style.display = 'block'; // 顯示提示字
+    nextStep(3);
+}
 
     // 讓 UI 回來
         function exitPhotoMode() {
@@ -179,6 +190,7 @@
     </script>
 </body>
 </html>
+
 
 
 
