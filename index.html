@@ -1,178 +1,20 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
+  <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-        .ui-container {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 15px; width: 90%;
-        }
-        .button-group { display: flex; gap: 10px; justify-content: center; }
-        button {
-            padding: 12px 20px; font-size: 16px; cursor: pointer;
-            background: white; border: 2px solid #ffcccc; border-radius: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .confirm-btn { background-color: #ffcccc; font-weight: bold; }
-        .action-btn { background-color: #e0f7fa; border-color: #b2ebf2; }
-        .step-hint { background: rgba(0,0,0,0.6); color: white; padding: 8px 20px; border-radius: 20px; font-size: 14px; }
-    </style>
-</head>
+  </head>
+  <body>
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-<body style="margin: 0; overflow: hidden;">
-    <div class="ui-container">
-        <div id="hint" class="step-hint">第一步：選擇背景裝飾</div>
-        
-        <div id="step1-btns" class="button-group">
-            <button onclick="selectLayer('deco', 'heart')">❤ 愛心</button>
-            <button onclick="selectLayer('deco', 'star')">⭐ 星星</button>
-            <button class="confirm-btn" onclick="nextStep(2)">下一個 ✔</button>
-        </div>
-
-        <div id="step2-btns" class="button-group" style="display: none;">
-            <button onclick="backToStep1()">⬅ 返回</button>
-            <button onclick="selectLayer('ribbon', 'ribbon_a')">🎀 緞帶</button>
-            <button onclick="selectLayer('ribbon', 'bow')">🎁 蝴蝶結</button>
-            <button class="confirm-btn" onclick="nextStep(3)">完成 ✔</button>
-        </div>
-
-        <div id="step3-btns" class="button-group" style="display: none;">
-    <button id="btn-3d" class="action-btn" onclick="toggle3D()">🐑 召喚/收回小羊</button>
-    
-    <button class="action-btn" onclick="enterPhotoMode(event)">📸 隱藏介面合照</button>
-    <button onclick="resetGame()">🔄 再玩一次</button>
-</div>
-    </div>
-
-    <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; patternRatio: 0.5;" renderer="preserveDrawingBuffer: true;">
-        <a-marker type="pattern" url="./pattern-sheep.patt">
-            <a-image id="base-sheep" src="sheep.png" position="0 0 0" rotation="-90 0 0" width="1.5" height="1.5"></a-image>
-
-            <a-image id="layer-heart" src="heart.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"
-                     animation="property: scale; from: 1 1 1; to: 1.1 1.1 1.1; dir: alternate; dur: 600; loop: true; easing: easeInOutSine"></a-image>
-            <a-image id="layer-star" src="star.png" position="0 0.1 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"
-                     animation="property: rotation; from: -90 0 0; to: -90 360 0; dur: 5000; loop: true; easing: linear"></a-image>
-
-            <a-image id="layer-ribbon_a" src="ribbon.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
-            <a-image id="layer-bow" src="bow.png" position="0 0.2 0" rotation="-90 0 0" width="1.5" height="1.5" visible="false"></a-image>
-
-            <a-gltf-model id="layer-3d" 
-              src="test.glb?v=3" 
-              position="-0.8 0.3 0" 
-              scale="0.2 0.2 0.2" 
-              rotation="-90 0 0" 
-              visible="false"
-              animation="property: rotation; from: -90 0 0; to: -90 0 360; loop: true; dur: 5000; easing: linear">
-            </a-gltf-model>
-        </a-marker>
-        <a-entity camera></a-entity>
+      <a-entity mindar-image-target="targetIndex: 0">
+          <a-image src="sheep.png" position="0 0 0" height="1" width="1" rotation="0 0 0"></a-image>
+          <a-gltf-model src="test.glb" position="0 0 0.1" scale="0.2 0.2 0.2" rotation="0 0 0"></a-gltf-model>
+      </a-entity>
+      
     </a-scene>
-
-    <script>
-       // 拍照隱藏 UI 介面
-function enterPhotoMode(event) {
-    if (event) event.stopPropagation();
-
-    // 1. 隱藏 UI 容器和提示字
-    document.querySelector('.ui-container').style.display = 'none';
-    document.getElementById('hint').style.display = 'none'; 
-
-    // 2. 使用最高層級的 document 監聽，並使用 pointerdown (相容性最高)
-    // 延遲 300ms 避開原本按鈕按下的動作
-    setTimeout(() => {
-        document.addEventListener('pointerdown', exitPhotoMode, { once: true });
-    }, 300);
-}
-
-// 喚回 UI 的函數
-function exitPhotoMode(event) {
-    // 1. 重新顯示 UI 容器與提示字
-    document.querySelector('.ui-container').style.display = 'flex';
-    document.getElementById('hint').style.display = 'block'; 
-    
-    // 2. 清理監聽器
-    document.removeEventListener('pointerdown', exitPhotoMode);
-
-    // 3. 確保回到 Step 3 介面
-    nextStep(3);
-}
-
-function selectLayer(group, item) {
-    if (group === 'deco') {
-        document.querySelector('#layer-heart').setAttribute('visible', item === 'heart');
-        document.querySelector('#layer-star').setAttribute('visible', item === 'star');
-    } else if (group === 'ribbon') {
-        document.querySelector('#layer-ribbon_a').setAttribute('visible', item === 'ribbon_a');
-        document.querySelector('#layer-bow').setAttribute('visible', item === 'bow');
-    }
-}
-
-        // 新增：切換 3D 模型顯示或隱藏
-function toggle3D() {
-    const model3d = document.querySelector('#layer-3d');
-    if (model3d) {
-        // 抓取目前的可見狀態
-        const isVisible = model3d.getAttribute('visible');
-        // 如果是 true 就變 false，反之亦然
-        model3d.setAttribute('visible', !isVisible);
-        
-        // 可選：根據狀態改變按鈕文字
-        const btn = document.getElementById('btn-3d');
-        btn.innerText = !isVisible ? '🐑 收回小羊' : '🐑 召喚小羊';
-    }
-}
-
-// 修改後的 nextStep 函數
-function nextStep(step) {
-    hideAllUI();
-    if (step === 2) {
-        document.getElementById('step2-btns').style.display = 'flex';
-        document.getElementById('hint').innerText = '第二步：加上飾品';
-    } else if (step === 3) {
-        document.getElementById('step3-btns').style.display = 'flex';
-        document.getElementById('hint').innerText = '最後一步：點擊召喚 3D 驚喜';
-    }
-}
-
-
-function hideAllUI() {
-    document.getElementById('step1-btns').style.display = 'none';
-    document.getElementById('step2-btns').style.display = 'none';
-    document.getElementById('step3-btns').style.display = 'none';
-}
-
-function backToStep1() {
-    hideAllUI();
-    document.getElementById('step1-btns').style.display = 'flex';
-    document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
-}
-
-function resetGame() {
-    const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow', '#layer-3d'];
-    layers.forEach(id => {
-        const el = document.querySelector(id);
-        if (el) {
-            el.setAttribute('visible', 'false');
-            if (id === '#layer-3d') {
-                el.setAttribute('scale', '0.2 0.2 0.2');
-            } else {
-                el.setAttribute('scale', '1 1 1');
-            }
-        }
-    });
-    // 重置 3D 按鈕文字
-    const btn = document.getElementById('btn-3d');
-    if (btn) btn.innerText = '🐑 召喚/收回小羊';
-    
-    window.removeEventListener('click', exitPhotoMode);
-    backToStep1();
-}
-    </script>
-</body>
+  </body>
 </html>
-
-
-
