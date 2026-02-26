@@ -71,7 +71,7 @@
     </div>
     </div>
     
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: ture" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
     
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
@@ -132,25 +132,29 @@ function toggle3D() {
     const model3d = document.querySelector('#layer-3d');
     const btn = document.getElementById('btn-3d');
     
-    // 嚴謹判斷 visible 狀態
     const currentVisible = model3d.getAttribute('visible');
     const isVisible = (currentVisible === true || currentVisible === 'true');
 
     if (!isVisible) {
-        // 召喚邏輯
+        // 召喚前先移除可能殘留的動畫組件 ---
+        model3d.removeAttribute('animation__scale'); 
+        
         model3d.setAttribute('visible', 'true');
-        model3d.setAttribute('animation__scale', {
-            property: 'scale',
-            from: '0 0 0',
-            to: '0.2 0.2 0.2',
-            dur: 800,
-            easing: 'easeOutBack'
-        });
+        // 使用 setTimeout 確保屬性更新後才執行新動畫
+        setTimeout(() => {
+            model3d.setAttribute('animation__scale', {
+                property: 'scale',
+                from: '0 0 0',
+                to: '0.2 0.2 0.2',
+                dur: 800,
+                easing: 'easeOutBack'
+            });
+        }, 10);
         btn.innerText = '收回小羊';
     } else {
-        // 收回邏輯
+        // 收回時直接移除動畫，並重置數值 ---
+        model3d.removeAttribute('animation__scale');
         model3d.setAttribute('visible', 'false');
-        // 同時重置 scale，確保下次彈跳動畫正常
         model3d.setAttribute('scale', '0 0 0'); 
         btn.innerText = '召喚小羊';
     }
@@ -184,17 +188,29 @@ function resetGame() {
     layers.forEach(id => {
         const el = document.querySelector(id);
         if (el) {
+            // 如果是 3D 物件，額外移除動畫組件
+            if (id === '#layer-3d') {
+                el.removeAttribute('animation__scale');
+                el.setAttribute('scale', '0 0 0');
+            } else {
+                el.setAttribute('scale', '1 1 1');
+            }
             el.setAttribute('visible', 'false');
-            el.setAttribute('scale', id === '#layer-3d' ? '0 0 0' : '1 1 1');
         }
     });
+    
     const btn = document.getElementById('btn-3d');
     if (btn) btn.innerText = '🐑 召喚小羊';
+    
+    // 移除可能殘留的拍照模式監聽器
+    document.removeEventListener('pointerdown', exitPhotoMode);
+    
     backToStep1();
 }
     </script>
   </body>
 </html>
+
 
 
 
