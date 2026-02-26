@@ -94,14 +94,18 @@
         if(model3d) model3d.setAttribute('visible', 'true');
             }
         }
-
+       // 讓 UI 消失
+        function hideAllUI() {
+            document.getElementById('step1-btns').style.display = 'none';
+            document.getElementById('step2-btns').style.display = 'none';
+            document.getElementById('step3-btns').style.display = 'none';
+        }
         function backToStep1() {
             hideAllUI();
             document.getElementById('step1-btns').style.display = 'flex';
             document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
         }
 
-        // 讓 UI 消失
         function enterPhotoMode() {
             // 1. 隱藏 UI 容器和提示字
             document.querySelector('.ui-container').style.display = 'none';
@@ -123,17 +127,27 @@
         }
 
         function resetGame() {
-            // 重置所有圖層可見度與比例
-            const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow', '#layer-3d']; // 加入 3D ID
+    // 1. 隱藏所有圖層
+    const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow', '#layer-3d'];
     layers.forEach(id => {
         const el = document.querySelector(id);
         if (el) {
             el.setAttribute('visible', 'false');
-            el.setAttribute('scale', '1 1 1');
+            // 這裡要判斷：如果是 3D 模型就回 0.2，如果是圖片就回 1
+            if (id === '#layer-3d') {
+                el.setAttribute('scale', '0.2 0.2 0.2');
+            } else {
+                el.setAttribute('scale', '1 1 1');
+            }
         }
     });
+    
+    // 2. 移除全螢幕點擊監聽器（防止在拍照模式下按再玩一次導致錯誤）
+    window.removeEventListener('click', exitPhotoMode);
+    
+    // 3. 回到第一步
     backToStep1();
-        }
+}
 
         async function takeSnapshot() {
             const scene = document.querySelector('a-scene');
@@ -165,6 +179,7 @@
     </script>
 </body>
 </html>
+
 
 
 
