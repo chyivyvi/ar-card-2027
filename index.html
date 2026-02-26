@@ -40,9 +40,9 @@
         </div>
 
         <div id="step3-btns" class="button-group" style="display: none;">
-            <button class="action-btn" onclick="takeSnapshot()">📸 分享照片</button>
+            <button class="action-btn" onclick="enterPhotoMode()">📸 隱藏介面合照</button>
             <button onclick="resetGame()">🔄 再玩一次</button>
-        </div>
+         </div>
     </div>
 
     <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; patternRatio: 0.5;" renderer="preserveDrawingBuffer: true;">
@@ -101,10 +101,25 @@
             document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
         }
 
-        function hideAllUI() {
-            document.getElementById('step1-btns').style.display = 'none';
-            document.getElementById('step2-btns').style.display = 'none';
-            document.getElementById('step3-btns').style.display = 'none';
+        // 讓 UI 消失
+        function enterPhotoMode() {
+            // 1. 隱藏 UI 容器和提示字
+            document.querySelector('.ui-container').style.display = 'none';
+    
+            // 2. 顯示一個浮動的小提示（可選，告訴使用者點螢幕回來）
+            // 或者乾脆全空，讓畫面最乾淨
+    
+            // 3. 監聽全螢幕點擊事件
+            window.addEventListener('click', exitPhotoMode, { once: true });
+        }
+
+    // 讓 UI 回來
+        function exitPhotoMode() {
+            // 1. 重新顯示 UI 容器
+            document.querySelector('.ui-container').style.display = 'flex';
+    
+            // 2. 確保它回到當前的步驟 (Step 3)
+        nextStep(3);
         }
 
         function resetGame() {
@@ -150,6 +165,7 @@
     </script>
 </body>
 </html>
+
 
 
 
