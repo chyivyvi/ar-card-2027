@@ -70,28 +70,35 @@
     </a-scene>
 
     <script>
-        // --- 拍照隱藏 UI 功能 ---
+        // 拍照隱藏 UI 介面
 function enterPhotoMode(event) {
-    // 1. 阻止事件冒泡，防止立即觸發 exitPhotoMode
     if (event) event.stopPropagation();
 
-    // 2. 隱藏 UI 容器和上方提示字
     document.querySelector('.ui-container').style.display = 'none';
     document.getElementById('hint').style.display = 'none'; 
 
-    // 3. 延遲一點點再監聽點擊，確保手機端觸控不會誤觸
+    // 延遲一下再掛載監聽器，避免誤觸
     setTimeout(() => {
-        window.addEventListener('click', exitPhotoMode, { once: true });
-    }, 200);
+        // 保險起見，同時監聽 click 和 touchstart (手機用)
+        const scene = document.querySelector('a-scene');
+        scene.addEventListener('click', exitPhotoMode, { once: true });
+        scene.addEventListener('touchstart', exitPhotoMode, { once: true });
+    }, 300);
 }
 
-// 喚回 UI 的函數 (只保留這一個版本)
-function exitPhotoMode() {
-    // 1. 重新顯示 UI 容器和提示字
+// 喚回 UI 的函數
+function exitPhotoMode(event) {
+    // 防止事件繼續傳遞
+    if (event) event.stopPropagation();
+
     document.querySelector('.ui-container').style.display = 'flex';
     document.getElementById('hint').style.display = 'block'; 
     
-    // 2. 確保 UI 回到第三步的按鈕狀態
+    // 移除重複的監聽器，確保乾淨
+    const scene = document.querySelector('a-scene');
+    scene.removeEventListener('click', exitPhotoMode);
+    scene.removeEventListener('touchstart', exitPhotoMode);
+
     nextStep(3);
 }
 
@@ -149,3 +156,4 @@ function resetGame() {
     </script>
 </body>
 </html>
+
