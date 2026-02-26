@@ -70,81 +70,72 @@
     </a-scene>
 
     <script>
-        function selectLayer(group, item) {
-            if (group === 'deco') {
-                document.querySelector('#layer-heart').setAttribute('visible', item === 'heart');
-                document.querySelector('#layer-star').setAttribute('visible', item === 'star');
-            } else if (group === 'ribbon') {
-                document.querySelector('#layer-ribbon_a').setAttribute('visible', item === 'ribbon_a');
-                document.querySelector('#layer-bow').setAttribute('visible', item === 'bow');
-            }
-        }
-
-        function nextStep(step) {
-            hideAllUI();
-            if (step === 2) {
-                document.getElementById('step2-btns').style.display = 'flex';
-                document.getElementById('hint').innerText = '第二步：加上飾品';
-            } else if (step === 3) {
-                document.getElementById('step3-btns').style.display = 'flex';
-                document.getElementById('hint').innerText = '太棒了！快拍張照分享吧';
-
-                // 顯示 3D 模型
-        const model3d = document.querySelector('#layer-3d');
-        if(model3d) model3d.setAttribute('visible', 'true');
-            }
-        }
-       // 讓 UI 消失
-        function hideAllUI() {
-            document.getElementById('step1-btns').style.display = 'none';
-            document.getElementById('step2-btns').style.display = 'none';
-            document.getElementById('step3-btns').style.display = 'none';
-        }
-        function backToStep1() {
-            hideAllUI();
-            document.getElementById('step1-btns').style.display = 'flex';
-            document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
-        }
-
-        // 拍照隱藏UI介面
-    function enterPhotoMode(event) {
-    // 阻止事件傳給 window，避免秒速退出
+        // --- 拍照隱藏 UI 功能 ---
+function enterPhotoMode(event) {
+    // 1. 阻止事件冒泡，防止立即觸發 exitPhotoMode
     if (event) event.stopPropagation();
 
-    // 1. 隱藏 UI 容器
+    // 2. 隱藏 UI 容器和上方提示字
     document.querySelector('.ui-container').style.display = 'none';
-    
-    // 2. 監聽全螢幕點擊事件來喚回
-    // 加上 setTimeout 是為了保險，確保這次的點擊動作已經結束
+    document.getElementById('hint').style.display = 'none'; 
+
+    // 3. 延遲一點點再監聽點擊，確保手機端觸控不會誤觸
     setTimeout(() => {
         window.addEventListener('click', exitPhotoMode, { once: true });
-    }, 100);
-        document.getElementById('hint').style.display = 'none'; // 隱藏提示字
+    }, 200);
 }
 
+// 喚回 UI 的函數 (只保留這一個版本)
 function exitPhotoMode() {
+    // 1. 重新顯示 UI 容器和提示字
     document.querySelector('.ui-container').style.display = 'flex';
-    document.getElementById('hint').style.display = 'block'; // 顯示提示字
+    document.getElementById('hint').style.display = 'block'; 
+    
+    // 2. 確保 UI 回到第三步的按鈕狀態
     nextStep(3);
 }
 
-    // 讓 UI 回來
-        function exitPhotoMode() {
-            // 1. 重新顯示 UI 容器
-            document.querySelector('.ui-container').style.display = 'flex';
-    
-            // 2. 確保它回到當前的步驟 (Step 3)
-        nextStep(3);
-        }
+function selectLayer(group, item) {
+    if (group === 'deco') {
+        document.querySelector('#layer-heart').setAttribute('visible', item === 'heart');
+        document.querySelector('#layer-star').setAttribute('visible', item === 'star');
+    } else if (group === 'ribbon') {
+        document.querySelector('#layer-ribbon_a').setAttribute('visible', item === 'ribbon_a');
+        document.querySelector('#layer-bow').setAttribute('visible', item === 'bow');
+    }
+}
 
-        function resetGame() {
-    // 1. 隱藏所有圖層
+function nextStep(step) {
+    hideAllUI();
+    if (step === 2) {
+        document.getElementById('step2-btns').style.display = 'flex';
+        document.getElementById('hint').innerText = '第二步：加上飾品';
+    } else if (step === 3) {
+        document.getElementById('step3-btns').style.display = 'flex';
+        document.getElementById('hint').innerText = '太棒了！快拍張照分享吧';
+        const model3d = document.querySelector('#layer-3d');
+        if(model3d) model3d.setAttribute('visible', 'true');
+    }
+}
+
+function hideAllUI() {
+    document.getElementById('step1-btns').style.display = 'none';
+    document.getElementById('step2-btns').style.display = 'none';
+    document.getElementById('step3-btns').style.display = 'none';
+}
+
+function backToStep1() {
+    hideAllUI();
+    document.getElementById('step1-btns').style.display = 'flex';
+    document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
+}
+
+function resetGame() {
     const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow', '#layer-3d'];
     layers.forEach(id => {
         const el = document.querySelector(id);
         if (el) {
             el.setAttribute('visible', 'false');
-            // 這裡要判斷：如果是 3D 模型就回 0.2，如果是圖片就回 1
             if (id === '#layer-3d') {
                 el.setAttribute('scale', '0.2 0.2 0.2');
             } else {
@@ -152,51 +143,9 @@ function exitPhotoMode() {
             }
         }
     });
-    
-    // 2. 移除全螢幕點擊監聽器（防止在拍照模式下按再玩一次導致錯誤）
     window.removeEventListener('click', exitPhotoMode);
-    
-    // 3. 回到第一步
     backToStep1();
 }
-
-        async function takeSnapshot() {
-            const scene = document.querySelector('a-scene');
-            scene.renderer.render(scene.object3D, scene.camera);
-            const canvas = scene.renderer.domElement;
-
-            const tempCanvas = document.createElement('canvas');
-            const ctx = tempCanvas.getContext('2d');
-            
-            // 修正比例：使用顯示寬高
-            tempCanvas.width = canvas.clientWidth;
-            tempCanvas.height = canvas.clientHeight;
-            ctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
-
-            tempCanvas.toBlob(async (blob) => {
-                const file = new File([blob], "AR_Card.png", { type: "image/png" });
-                if (navigator.share && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({ files: [file], title: '我的 AR 賀卡' });
-                    } catch (err) {}
-                } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'AR_Card.png';
-                    link.click();
-                }
-            }, 'image/png');
-        }
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
