@@ -131,11 +131,14 @@ function backToStep1() {
 function toggle3D() {
     const model3d = document.querySelector('#layer-3d');
     const btn = document.getElementById('btn-3d');
-    const isVisible = model3d.getAttribute('visible') === true;
+    
+    // 嚴謹判斷 visible 狀態
+    const currentVisible = model3d.getAttribute('visible');
+    const isVisible = (currentVisible === true || currentVisible === 'true');
 
     if (!isVisible) {
+        // 召喚邏輯
         model3d.setAttribute('visible', 'true');
-        // 彈跳登場動畫 (easeOutBack 效果)
         model3d.setAttribute('animation__scale', {
             property: 'scale',
             from: '0 0 0',
@@ -143,13 +146,15 @@ function toggle3D() {
             dur: 800,
             easing: 'easeOutBack'
         });
-        btn.innerText = '🐑 收回小羊';
+        btn.innerText = '收回小羊';
     } else {
+        // 收回邏輯
         model3d.setAttribute('visible', 'false');
-        btn.innerText = '🐑 召喚小羊';
+        // 同時重置 scale，確保下次彈跳動畫正常
+        model3d.setAttribute('scale', '0 0 0'); 
+        btn.innerText = '召喚小羊';
     }
 }
-
 // --- 隱藏介面與喚回 ---
 function enterPhotoMode(event) {
     if (event) event.stopPropagation();
@@ -161,10 +166,17 @@ function enterPhotoMode(event) {
 }
 
 function exitPhotoMode() {
+    // 1. 重新顯示 UI 容器與提示字
     document.querySelector('.ui-container').style.display = 'flex';
     document.getElementById('hint').style.display = 'block'; 
+    
+    // 2. 清理監聽器
     document.removeEventListener('pointerdown', exitPhotoMode);
-    nextStep(3);
+
+    // 3. 確保 step3 的按鈕組是顯示的，但不重置內部邏輯
+    hideAllUI();
+    document.getElementById('step3-btns').style.display = 'flex';
+    document.getElementById('hint').innerText = '最後一步：召喚 3D 小羊！';
 }
 
 function resetGame() {
@@ -183,5 +195,6 @@ function resetGame() {
     </script>
   </body>
 </html>
+
 
 
