@@ -11,22 +11,139 @@
   </head>
 
   <body>
-    <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: yes; uiError: yes; uiScanning: yes;" 
-      color-space="sRGB" 
-      renderer="colorManagement: true, physicallyCorrectLights: false" 
-      vr-mode-ui="enabled: false" 
-      device-orientation-permission-ui="enabled: false">
-      
-      <a-assets>
-          <img id="sheep-img" src="sheep.png">
-      </a-assets>
+    <div class="ui-container">
+    <div id="hint" class="step-hint">第一步：選擇背景裝飾</div>
+    
+    <div id="step1-btns" class="button-group">
+        <button onclick="selectLayer('deco', 'heart')">❤ 愛心</button>
+        <button onclick="selectLayer('deco', 'star')">⭐ 星星</button>
+        <button class="confirm-btn" onclick="nextStep(2)">下一個 ✔</button>
+    </div>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <div id="step2-btns" class="button-group" style="display: none;">
+        <button onclick="backToStep1()">⬅ 返回</button>
+        <button onclick="selectLayer('ribbon', 'ribbon_a')">🎀 緞帶</button>
+        <button onclick="selectLayer('ribbon', 'bow')">🎁 蝴蝶結</button>
+        <button class="confirm-btn" onclick="nextStep(3)">完成 ✔</button>
+    </div>
 
-      <a-entity mindar-image-target="targetIndex: 0">
-          <a-image src="#sheep-img" position="0 0 0" width="1" height="1"></a-image>
-      </a-entity>
-    </a-scene>
+    <div id="step3-btns" class="button-group" style="display: none;">
+        <button id="btn-3d" class="action-btn" onclick="toggle3D()">🐑 召喚小羊</button>
+        <button class="action-btn" onclick="enterPhotoMode(event)">📸 隱藏介面合照</button>
+        <button onclick="resetGame()">🔄 再玩一次</button>
+    </div>
+    </div>
+    
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: false" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+        <a-image id="base-sheep" src="sheep.png" position="0 0 0" width="1" height="1"></a-image>
+
+        <a-image id="layer-heart" src="heart.png" position="0 0 0.01" width="1" height="1" visible="false"
+                 animation="property: scale; from: 1 1 1; to: 1.1 1.1 1.1; dir: alternate; dur: 600; loop: true; easing: easeInOutSine"></a-image>
+        <a-image id="layer-star" src="star.png" position="0 0 0.01" width="1" height="1" visible="false"
+                 animation="property: rotation; from: 0 0 0; to: 0 0 360; dur: 5000; loop: true; easing: linear"></a-image>
+
+        <a-image id="layer-ribbon_a" src="ribbon.png" position="0 0 0.02" width="1" height="1" visible="false"></a-image>
+        <a-image id="layer-bow" src="bow.png" position="0 0 0.02" width="1" height="1" visible="false"></a-image>
+
+        <a-gltf-model id="layer-3d" src="test.glb" position="-0.4 0 0.05" scale="0 0 0" visible="false"
+                      animation="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; dur: 5000; easing: linear">
+        </a-gltf-model>
+    </a-entity>
+</a-scene>
+    <script>
+      // --- 基礎圖層切換 ---
+function selectLayer(group, item) {
+    if (group === 'deco') {
+        document.querySelector('#layer-heart').setAttribute('visible', item === 'heart');
+        document.querySelector('#layer-star').setAttribute('visible', item === 'star');
+    } else if (group === 'ribbon') {
+        document.querySelector('#layer-ribbon_a').setAttribute('visible', item === 'ribbon_a');
+        document.querySelector('#layer-bow').setAttribute('visible', item === 'bow');
+    }
+}
+
+// --- 步驟控制 ---
+function nextStep(step) {
+    hideAllUI();
+    if (step === 2) {
+        document.getElementById('step2-btns').style.display = 'flex';
+        document.getElementById('hint').innerText = '第二步：加上飾品';
+    } else if (step === 3) {
+        document.getElementById('step3-btns').style.display = 'flex';
+        document.getElementById('hint').innerText = '最後一步：召喚 3D 小羊！';
+    }
+}
+
+function hideAllUI() {
+    document.getElementById('step1-btns').style.display = 'none';
+    document.getElementById('step2-btns').style.display = 'none';
+    document.getElementById('step3-btns').style.display = 'none';
+}
+
+function backToStep1() {
+    hideAllUI();
+    document.getElementById('step1-btns').style.display = 'flex';
+    document.getElementById('hint').innerText = '第一步：選擇背景裝飾';
+}
+
+// --- 3D 召喚特效 ---
+function toggle3D() {
+    const model3d = document.querySelector('#layer-3d');
+    const btn = document.getElementById('btn-3d');
+    const isVisible = model3d.getAttribute('visible') === true;
+
+    if (!isVisible) {
+        model3d.setAttribute('visible', 'true');
+        // 彈跳登場動畫 (easeOutBack 效果)
+        model3d.setAttribute('animation__scale', {
+            property: 'scale',
+            from: '0 0 0',
+            to: '0.2 0.2 0.2',
+            dur: 800,
+            easing: 'easeOutBack'
+        });
+        btn.innerText = '🐑 收回小羊';
+    } else {
+        model3d.setAttribute('visible', 'false');
+        btn.innerText = '🐑 召喚小羊';
+    }
+}
+
+// --- 隱藏介面與喚回 ---
+function enterPhotoMode(event) {
+    if (event) event.stopPropagation();
+    document.querySelector('.ui-container').style.display = 'none';
+    document.getElementById('hint').style.display = 'none'; 
+    setTimeout(() => {
+        document.addEventListener('pointerdown', exitPhotoMode, { once: true });
+    }, 300);
+}
+
+function exitPhotoMode() {
+    document.querySelector('.ui-container').style.display = 'flex';
+    document.getElementById('hint').style.display = 'block'; 
+    document.removeEventListener('pointerdown', exitPhotoMode);
+    nextStep(3);
+}
+
+function resetGame() {
+    const layers = ['#layer-heart', '#layer-star', '#layer-ribbon_a', '#layer-bow', '#layer-3d'];
+    layers.forEach(id => {
+        const el = document.querySelector(id);
+        if (el) {
+            el.setAttribute('visible', 'false');
+            el.setAttribute('scale', id === '#layer-3d' ? '0 0 0' : '1 1 1');
+        }
+    });
+    const btn = document.getElementById('btn-3d');
+    if (btn) btn.innerText = '🐑 召喚小羊';
+    backToStep1();
+}
+    </script>
   </body>
 </html>
+
