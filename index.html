@@ -5,9 +5,46 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      /* 確保畫布充滿全螢幕 */
-      body { margin: 0; overflow: hidden; }
-    </style>
+  body { margin: 0; overflow: hidden; }
+    .ui-container {
+    position: fixed; 
+    bottom: 30px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    z-index: 1000; /* 必須大於 1 */
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 15px; 
+    width: 90%;
+  }
+
+  .button-group { 
+    display: flex; 
+    gap: 10px; 
+    justify-content: center; 
+  }
+
+  button {
+    padding: 12px 20px; 
+    font-size: 16px; 
+    cursor: pointer;
+    background: white; 
+    border: 2px solid #ffcccc; 
+    border-radius: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .confirm-btn { background-color: #ffcccc; font-weight: bold; }
+  .action-btn { background-color: #e0f7fa; border-color: #b2ebf2; }
+  .step-hint { 
+    background: rgba(0,0,0,0.6); 
+    color: white; 
+    padding: 8px 20px; 
+    border-radius: 20px; 
+    font-size: 14px; 
+  }
+</style>
   </head>
 
   <body>
@@ -146,4 +183,5 @@ function resetGame() {
     </script>
   </body>
 </html>
+
 
